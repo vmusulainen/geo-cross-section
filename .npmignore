@@ -1,0 +1,12 @@
+# Included: only dist/ (controlled by "files" in package.json)
+
+# Exclude everything else explicitly
+src/
+scripts/
+public/
+node_modules/
+index.html
+tsconfig*.json
+vite.config.ts
+package-lock.json
+*.mjs

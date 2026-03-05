@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geological Cross-Section</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        height: 100%;
+        background: #1a1a2e;
+        color: #eee;
+        font-family: system-ui, sans-serif;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        padding: 20px 24px 16px;
+        gap: 10px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      h1 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.55;
+      }
+
+      .hint {
+        font-size: 0.75rem;
+        opacity: 0.35;
+      }
+
+      .canvas-wrapper {
+        flex: 1;
+        background: #f5f2ed;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 32px rgba(0,0,0,0.45);
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        cursor: default;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Geological Cross-Section</h1>
+      <p class="hint">scroll to zoom · drag to pan · hover to identify layers</p>
+    </header>
+    <div class="canvas-wrapper" id="canvas-container">
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

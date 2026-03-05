@@ -1,0 +1,34 @@
+{
+  "name": "geo-cross-section",
+  "version": "0.1.0",
+  "description": "Zero-dependency TypeScript/Canvas 2D library for rendering interactive 2D geological cross-sections in web browsers",
+  "license": "MIT",
+  "keywords": ["geology", "cross-section", "canvas", "visualization", "stratigraphy"],
+  "type": "module",
+  "main": "./dist/geo-cross-section.umd.js",
+  "module": "./dist/geo-cross-section.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/geo-cross-section.es.js",
+      "require": "./dist/geo-cross-section.umd.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "generate": "node scripts/generate-data.mjs"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}
+
