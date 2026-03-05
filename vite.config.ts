@@ -18,4 +18,8 @@ export default defineConfig({
       fileName: (format) => `geo-cross-section.${format}.js`,
     },
   },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
+  },
 })
