@@ -28,9 +28,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "generate": "node scripts/generate-data.mjs"
+    "build": "tsc && vite build"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
