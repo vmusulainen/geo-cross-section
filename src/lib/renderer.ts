@@ -1,4 +1,4 @@
-import type { LayerPolygon, Transform, Marker, MarkerStyle, LayerStyle, AxesStyle } from './types'
+import type { LayerPolygon, Transform, Marker, MarkerStyle, LayerStyle, AxesStyle, RefLine, RefLineStyle } from './types'
 import { getPattern, getHatchImageSize } from './patterns'
 
 export type { Transform }
@@ -206,7 +206,65 @@ export function drawAxes(
   ctx.restore()
 }
 
-/** Draw a click-placed measurement marker: dot + coord label + h1/h2 depth lines */
+/**
+ * Draw vertical reference lines spanning the full section height.
+ * Each line shows a label with lat/lon (or a custom label) at the top.
+ */
+export function drawRefLines(
+  ctx: CanvasRenderingContext2D,
+  refLines: RefLine[],
+  vp: Viewport,
+  transform: Transform,
+  style: Required<RefLineStyle>,
+): void {
+  if (refLines.length === 0) return
+
+  const { color, width, dash, labelColor, labelBg, font, labelPadding: pad } = style
+
+  ctx.save()
+  // Clip to draw area
+  ctx.beginPath()
+  ctx.rect(vp.offsetX, vp.offsetY, vp.drawRight - vp.offsetX, vp.drawBottom - vp.offsetY)
+  ctx.clip()
+
+  ctx.font = font
+  const fontSize = parseFloat(font) || 11
+  const badgeH = fontSize + pad * 2
+
+  for (const line of refLines) {
+    const cx = toScreen(line.distance, 0, vp)[0] * transform.k + transform.x
+    if (cx < vp.offsetX || cx > vp.drawRight) continue
+
+    // Vertical dashed line
+    ctx.strokeStyle = color
+    ctx.lineWidth = width
+    ctx.setLineDash(dash)
+    ctx.beginPath()
+    ctx.moveTo(cx, vp.offsetY)
+    ctx.lineTo(cx, vp.drawBottom)
+    ctx.stroke()
+    ctx.setLineDash([])
+
+    // Label badge at the top
+    const text = line.label
+      ?? `${line.lat.toFixed(4)}°, ${line.lon.toFixed(4)}°`
+    const tw = ctx.measureText(text).width
+    const bw = tw + pad * 2
+    // Centre badge on the line, clamped to draw area
+    const rx = Math.min(Math.max(cx - bw / 2, vp.offsetX), vp.drawRight - bw)
+    const ry = vp.offsetY + 2
+
+    ctx.fillStyle = labelBg
+    ctx.fillRect(rx, ry, bw, badgeH)
+    ctx.fillStyle = labelColor
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(text, rx + pad, ry + badgeH / 2)
+  }
+
+  ctx.restore()
+}
+
 /** Draw a small dot at the current hover position */
 export function drawHoverDot(
   ctx: CanvasRenderingContext2D,

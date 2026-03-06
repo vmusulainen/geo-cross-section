@@ -43,6 +43,20 @@ export interface CrossSectionData {
   series: BoundsPoint[]
   /** Optional per-layer visual info. Missing fields fall back to defaults. */
   layerInfo?: LayerInfo[]
+  /** Optional vertical reference lines shown across the full section height */
+  refLines?: RefLine[]
+}
+
+/** A vertical reference line positioned at a known distance with geographic coordinates */
+export interface RefLine {
+  /** Horizontal distance along the transect (same units as series distances) */
+  distance: number
+  /** Geographic latitude in decimal degrees */
+  lat: number
+  /** Geographic longitude in decimal degrees */
+  lon: number
+  /** Optional custom label. Defaults to formatted lat/lon coordinates. */
+  label?: string
 }
 
 export interface Padding {
@@ -115,6 +129,23 @@ export interface TooltipStyle {
   whiteSpace?: string
 }
 
+export interface RefLineStyle {
+  /** Line colour (default: 'rgba(100,180,255,0.85)') */
+  color?: string
+  /** Line width in px (default: 1.5) */
+  width?: number
+  /** Dash pattern [dash, gap] (default: [6, 4]) */
+  dash?: [number, number]
+  /** Label text colour (default: same as color) */
+  labelColor?: string
+  /** Label badge background (default: 'rgba(10,10,10,0.72)') */
+  labelBg?: string
+  /** Font for the label badge (default: '11px system-ui,sans-serif') */
+  font?: string
+  /** Padding inside the label badge in px (default: 4) */
+  labelPadding?: number
+}
+
 export interface LayerStyle {
   /** Layer border stroke colour (default: 'rgba(40,40,40,0.4)') */
   borderColor?: string
@@ -132,6 +163,7 @@ export interface CrossSectionOptions {
   marker?: MarkerStyle
   tooltip?: TooltipStyle
   layer?: LayerStyle
+  refLine?: RefLineStyle
   /**
    * Desired on-screen size (px) for PNG hatch pattern tiles (default: 48).
    * Increase for coarser patterns, decrease for finer ones.

@@ -1,4 +1,4 @@
-import type { AxesStyle, MarkerStyle, TooltipStyle, LayerStyle, Padding } from './types'
+import type { AxesStyle, MarkerStyle, TooltipStyle, LayerStyle, RefLineStyle, Padding } from './types'
 
 export const DEFAULT_PADDING: Padding = {
   top: 16, right: 16, bottom: 36, left: 60,
@@ -47,4 +47,14 @@ export const DEFAULT_TOOLTIP: Required<TooltipStyle> = {
 export const DEFAULT_LAYER: Required<LayerStyle> = {
   borderColor: 'rgba(40,40,40,0.4)',
   borderWidth: 1,
+}
+
+export const DEFAULT_REF_LINE: Required<RefLineStyle> = {
+  color:        'rgba(100,180,255,0.85)',
+  width:        1.5,
+  dash:         [6, 4],
+  labelColor:   'rgba(100,180,255,0.85)',
+  labelBg:      'rgba(10,10,10,0.72)',
+  font:         '11px system-ui,sans-serif',
+  labelPadding: 4,
 }

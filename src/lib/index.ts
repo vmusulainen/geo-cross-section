@@ -1,15 +1,15 @@
-import type { CrossSectionData, CrossSectionOptions, Padding, LayerPolygon, Transform, AxesStyle, Marker, MarkerStyle, TooltipStyle, LayerStyle } from './types'
+import type { CrossSectionData, CrossSectionOptions, Padding, LayerPolygon, Transform, AxesStyle, Marker, MarkerStyle, TooltipStyle, LayerStyle, RefLineStyle } from './types'
 import { buildPolygons, interpolateLayerAt } from './geometry'
-import { computeViewport, drawPolygons, drawAxes, drawMarker, drawHoverDot } from './renderer'
+import { computeViewport, drawPolygons, drawAxes, drawMarker, drawHoverDot, drawRefLines } from './renderer'
 import type { Viewport } from './renderer'
 import { setupInteraction } from './interaction'
 import { preloadHatchImages } from './patterns'
 import {
   DEFAULT_PADDING, DEFAULT_HATCH_PATTERN_SIZE, DEFAULT_MEASUREMENT_UNIT,
-  DEFAULT_AXES, DEFAULT_MARKER, DEFAULT_TOOLTIP, DEFAULT_LAYER,
+  DEFAULT_AXES, DEFAULT_MARKER, DEFAULT_TOOLTIP, DEFAULT_LAYER, DEFAULT_REF_LINE,
 } from './defaults'
 
-export type { CrossSectionData, BoundsPoint, BoundsLayer, LayerInfo, CrossSectionOptions, PatternName, AxesStyle, Marker, MarkerStyle, TooltipStyle, LayerStyle } from './types'
+export type { CrossSectionData, BoundsPoint, BoundsLayer, LayerInfo, RefLine, CrossSectionOptions, PatternName, AxesStyle, Marker, MarkerStyle, TooltipStyle, LayerStyle, RefLineStyle } from './types'
 
 export class CrossSection {
   private readonly canvas: HTMLCanvasElement
@@ -20,6 +20,7 @@ export class CrossSection {
   private readonly hatchPatternSize: number
   private readonly markerStyle: Required<MarkerStyle>
   private readonly layerStyle: Required<LayerStyle>
+  private readonly refLineStyle: Required<RefLineStyle>
   private readonly unit: string
   private readonly teardown: () => void
   private readonly resizeObserver: ResizeObserver
@@ -51,6 +52,7 @@ export class CrossSection {
     this.hatchPatternSize = options.hatchPatternSize ?? DEFAULT_HATCH_PATTERN_SIZE
     this.markerStyle = { ...DEFAULT_MARKER, ...options.marker }
     this.layerStyle = { ...DEFAULT_LAYER, ...options.layer }
+    this.refLineStyle = { ...DEFAULT_REF_LINE, ...options.refLine }
     this.unit = options.measurementUnit ?? DEFAULT_MEASUREMENT_UNIT
 
     this.data = data
@@ -103,9 +105,14 @@ export class CrossSection {
   render(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     drawPolygons(this.ctx, this.polygons, this.viewport, this.transform, this.hatchPatternSize, this.layerStyle)
+    drawRefLines(this.ctx, this.data.refLines ?? [], this.viewport, this.transform, this.refLineStyle)
     drawAxes(this.ctx, this.viewport, this.transform, this.axesStyle)
-    if (this.hoverPoint) drawHoverDot(this.ctx, this.hoverPoint.x, this.hoverPoint.y, this.viewport, this.transform, this.markerStyle)
-    if (this.marker) drawMarker(this.ctx, this.marker, this.viewport, this.transform, this.markerStyle, this.unit)
+    if (this.hoverPoint) {
+      drawHoverDot(this.ctx, this.hoverPoint.x, this.hoverPoint.y, this.viewport, this.transform, this.markerStyle)
+    }
+    if (this.marker) {
+      drawMarker(this.ctx, this.marker, this.viewport, this.transform, this.markerStyle, this.unit)
+    }
   }
 
   /** Replace data and reset zoom/pan */
