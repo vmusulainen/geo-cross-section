@@ -1,6 +1,6 @@
 {
   "name": "geo-cross-section",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Zero-dependency TypeScript/Canvas 2D library for rendering interactive 2D geological cross-sections in web browsers",
   "license": "MIT",
   "keywords": [
