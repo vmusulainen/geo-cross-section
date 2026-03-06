@@ -1,5 +1,5 @@
 import type { CrossSectionData, CrossSectionOptions, Padding, LayerPolygon, Transform, AxesStyle, Marker, MarkerStyle, TooltipStyle, LayerStyle, RefLineStyle } from './types'
-import { buildPolygons, interpolateLayerAt } from './geometry'
+import { buildPolygons, interpolateLayerAt, interpolateGeoCoords } from './geometry'
 import { computeViewport, drawPolygons, drawAxes, drawMarker, drawHoverDot, drawRefLines } from './renderer'
 import type { Viewport } from './renderer'
 import { setupInteraction } from './interaction'
@@ -75,7 +75,10 @@ export class CrossSection {
           this.marker = null
         } else {
           const bounds = interpolateLayerAt(this.data, x, hit.layerId)
-          this.marker = bounds ? { x, y, ...bounds, layerId: hit.layerId } : null
+          const geo = interpolateGeoCoords(this.data.refLines ?? [], x)
+          this.marker = bounds
+            ? { x, y, ...bounds, layerId: hit.layerId, ...geo ?? {} }
+            : null
         }
         this.render()
       },

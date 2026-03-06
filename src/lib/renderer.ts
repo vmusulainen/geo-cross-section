@@ -376,8 +376,15 @@ export function drawMarker(
   ctx.fill(); ctx.stroke()
 
   // Coordinate label to the left of the dot
-  const label = `${Math.round(marker.x)} ${unit},  ${(Math.round(marker.y * 10) / 10).toFixed(1)} ${unit}`
-  drawBadge(label, px - 10, py, 'right')
+  const distLabel = `${Math.round(marker.x)} ${unit},  ${(Math.round(marker.y * 10) / 10).toFixed(1)} ${unit}`
+  const geoLabel = (marker.lat != null && marker.lon != null)
+    ? `${marker.lat.toFixed(5)}°, ${marker.lon.toFixed(5)}°`
+    : null
+
+  drawBadge(distLabel, px - 10, geoLabel ? py - (badgeH / 2 + 2) : py, 'right')
+  if (geoLabel) {
+    drawBadge(geoLabel, px - 10, py + (badgeH / 2 + 2), 'right')
+  }
 
   ctx.restore()
 }

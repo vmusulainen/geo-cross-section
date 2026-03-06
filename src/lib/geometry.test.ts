@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildPolygons, interpolateLayerAt } from './geometry'
+import { buildPolygons, interpolateLayerAt, interpolateGeoCoords } from './geometry'
 import type { CrossSectionData } from './types'
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
@@ -196,5 +196,69 @@ describe('interpolateLayerAt', () => {
   it('layerTop is always greater than layerBottom for valid data', () => {
     const result = interpolateLayerAt(simple, 60, 'sand')!
     expect(result.layerTop).toBeGreaterThan(result.layerBottom)
+  })
+})
+
+// ── interpolateGeoCoords ──────────────────────────────────────────────────────
+
+import type { RefLine } from './types'
+
+const refLines: RefLine[] = [
+  { distance: 0,   lat: 59.900, lon: 30.300 },
+  { distance: 500, lat: 59.910, lon: 30.350 },
+  { distance: 1000,lat: 59.920, lon: 30.400 },
+]
+
+describe('interpolateGeoCoords', () => {
+  it('returns null for fewer than 2 refLines', () => {
+    expect(interpolateGeoCoords([], 250)).toBeNull()
+    expect(interpolateGeoCoords([refLines[0]], 250)).toBeNull()
+  })
+
+  it('returns exact coords at a known refLine distance', () => {
+    const r = interpolateGeoCoords(refLines, 0)!
+    expect(r.lat).toBeCloseTo(59.900)
+    expect(r.lon).toBeCloseTo(30.300)
+  })
+
+  it('interpolates correctly at midpoint between two refLines', () => {
+    const r = interpolateGeoCoords(refLines, 250)!
+    expect(r.lat).toBeCloseTo(59.905)
+    expect(r.lon).toBeCloseTo(30.325)
+  })
+
+  it('interpolates at a non-midpoint', () => {
+    // t = (750-500)/(1000-500) = 0.5 → same as midpoint of second segment
+    const r = interpolateGeoCoords(refLines, 750)!
+    expect(r.lat).toBeCloseTo(59.915)
+    expect(r.lon).toBeCloseTo(30.375)
+  })
+
+  it('clamps to first refLine when distance is below the range', () => {
+    const r = interpolateGeoCoords(refLines, -100)!
+    expect(r.lat).toBeCloseTo(59.900)
+    expect(r.lon).toBeCloseTo(30.300)
+  })
+
+  it('clamps to last refLine when distance is above the range', () => {
+    const r = interpolateGeoCoords(refLines, 9999)!
+    expect(r.lat).toBeCloseTo(59.920)
+    expect(r.lon).toBeCloseTo(30.400)
+  })
+
+  it('handles unsorted refLines by sorting internally', () => {
+    const unsorted: RefLine[] = [
+      { distance: 1000, lat: 59.920, lon: 30.400 },
+      { distance: 0,    lat: 59.900, lon: 30.300 },
+      { distance: 500,  lat: 59.910, lon: 30.350 },
+    ]
+    const r = interpolateGeoCoords(unsorted, 250)!
+    expect(r.lat).toBeCloseTo(59.905)
+  })
+
+  it('returns non-null result for any distance within range', () => {
+    for (const d of [0, 100, 250, 500, 750, 1000]) {
+      expect(interpolateGeoCoords(refLines, d)).not.toBeNull()
+    }
   })
 })

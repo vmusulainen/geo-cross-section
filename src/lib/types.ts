@@ -188,6 +188,10 @@ export interface Marker {
   /** Elevation of the nearest layer boundary below the click point */
   layerBottom: number
   layerId: string
+  /** Geographic latitude interpolated from refLines — present only when refLines are defined */
+  lat?: number
+  /** Geographic longitude interpolated from refLines — present only when refLines are defined */
+  lon?: number
 }
 
 /** Internal: a closed polygon in data-space representing one continuous layer segment */

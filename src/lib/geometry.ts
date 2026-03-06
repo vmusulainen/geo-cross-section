@@ -1,4 +1,4 @@
-import type { BoundsPoint, CrossSectionData, LayerInfo, LayerPolygon, Marker } from './types'
+import type { BoundsPoint, CrossSectionData, LayerInfo, LayerPolygon, Marker, RefLine } from './types'
 
 /**
  * Converts raw series data into closed polygons (one per continuous layer segment).
@@ -164,5 +164,47 @@ export function interpolateLayerAt(
   return {
     layerTop:    loTop + (hiTop - loTop) * t,
     layerBottom: loBtm + (hiBtm - loBtm) * t,
+  }
+}
+
+/**
+ * Linearly interpolates geographic coordinates (lat/lon) at a given distance
+ * using the nearest bracketing RefLine entries as control points.
+ * Returns null if fewer than 2 refLines are provided.
+ */
+export function interpolateGeoCoords(
+  refLines: RefLine[],
+  distance: number,
+): { lat: number; lon: number } | null {
+  if (refLines.length < 2) return null
+
+  // Sort by distance once (defensive — callers should keep them ordered)
+  const sorted = [...refLines].sort((a, b) => a.distance - b.distance)
+
+  // Clamp to the range of known ref lines
+  if (distance <= sorted[0].distance) {
+    return { lat: sorted[0].lat, lon: sorted[0].lon }
+  }
+  if (distance >= sorted[sorted.length - 1].distance) {
+    const last = sorted[sorted.length - 1]
+    return { lat: last.lat, lon: last.lon }
+  }
+
+  // Find bracketing pair
+  let lo = 0
+  let hi = sorted.length - 1
+  while (lo < hi - 1) {
+    const mid = (lo + hi) >> 1
+    if (sorted[mid].distance <= distance) lo = mid
+    else hi = mid
+  }
+
+  const a = sorted[lo]
+  const b = sorted[hi]
+  const t = (distance - a.distance) / (b.distance - a.distance)
+
+  return {
+    lat: a.lat + (b.lat - a.lat) * t,
+    lon: a.lon + (b.lon - a.lon) * t,
   }
 }
