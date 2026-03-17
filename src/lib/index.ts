@@ -1,4 +1,4 @@
-import type { CrossSectionData, CrossSectionOptions, Padding, LayerPolygon, Transform, AxesStyle, Marker, MarkerStyle, TooltipStyle, LayerStyle, RefLineStyle } from './types'
+import type { CrossSectionData, CrossSectionOptions, Padding, LayerPolygon, Transform, AxesStyle, Marker, MarkerStyle, TooltipStyle, LayerStyle, RefLineStyle, ClickPoint } from './types'
 import { buildPolygons, interpolateLayerAt, interpolateGeoCoords } from './geometry'
 import { computeViewport, drawPolygons, drawAxes, drawMarker, drawHoverDot, drawRefLines } from './renderer'
 import type { Viewport } from './renderer'
@@ -9,7 +9,7 @@ import {
   DEFAULT_AXES, DEFAULT_MARKER, DEFAULT_TOOLTIP, DEFAULT_LAYER, DEFAULT_REF_LINE,
 } from './defaults'
 
-export type { CrossSectionData, BoundsPoint, BoundsLayer, LayerInfo, RefLine, CrossSectionOptions, PatternName, AxesStyle, Marker, MarkerStyle, TooltipStyle, LayerStyle, RefLineStyle } from './types'
+export type { CrossSectionData, BoundsPoint, BoundsLayer, LayerInfo, RefLine, CrossSectionOptions, PatternName, AxesStyle, Marker, MarkerStyle, TooltipStyle, LayerStyle, RefLineStyle, ClickPoint } from './types'
 
 export class CrossSection {
   private readonly canvas: HTMLCanvasElement
@@ -24,11 +24,12 @@ export class CrossSection {
   private readonly unit: string
   private readonly teardown: () => void
   private readonly resizeObserver: ResizeObserver
+  private readonly onClick: ((point: ClickPoint) => void) | undefined
 
   private data: CrossSectionData
   private polygons: LayerPolygon[] = []
   private viewport: Viewport
-  private transform: Transform = { k: 1, x: 0, y: 0 }
+  private transform: Transform
   private marker: Marker | null = null
   private hoverPoint: { x: number; y: number } | null = null
 
@@ -54,6 +55,8 @@ export class CrossSection {
     this.layerStyle = { ...DEFAULT_LAYER, ...options.layer }
     this.refLineStyle = { ...DEFAULT_REF_LINE, ...options.refLine }
     this.unit = options.measurementUnit ?? DEFAULT_MEASUREMENT_UNIT
+    this.onClick = options.onClick
+    this.transform = { k: 1, x: options.initialPan?.x ?? 0, y: options.initialPan?.y ?? 0 }
 
     this.data = data
     this.tooltip = this._makeTooltip(
@@ -79,6 +82,15 @@ export class CrossSection {
           this.marker = bounds
             ? { x, y, ...bounds, layerId: hit.layerId, ...geo ?? {} }
             : null
+          if (this.marker && this.onClick) {
+            this.onClick({
+              distance: this.marker.x,
+              elevation: this.marker.y,
+              lat: this.marker.lat,
+              lon: this.marker.lon,
+              layerId: this.marker.layerId,
+            })
+          }
         }
         this.render()
       },
@@ -107,9 +119,9 @@ export class CrossSection {
   /** Redraw the current data with the current viewport/transform */
   render(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    drawAxes(this.ctx, this.viewport, this.transform, this.axesStyle)
     drawPolygons(this.ctx, this.polygons, this.viewport, this.transform, this.hatchPatternSize, this.layerStyle)
     drawRefLines(this.ctx, this.data.refLines ?? [], this.viewport, this.transform, this.refLineStyle)
-    drawAxes(this.ctx, this.viewport, this.transform, this.axesStyle)
     if (this.hoverPoint) {
       drawHoverDot(this.ctx, this.hoverPoint.x, this.hoverPoint.y, this.viewport, this.transform, this.markerStyle)
     }

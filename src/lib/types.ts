@@ -153,6 +153,20 @@ export interface LayerStyle {
   borderWidth?: number
 }
 
+/** Data returned to the onClick callback when the user clicks on the cross section */
+export interface ClickPoint {
+  /** Horizontal distance along the transect (same units as measurementUnit) */
+  distance: number
+  /** Elevation at the click point */
+  elevation: number
+  /** Geographic latitude interpolated from refLines — present only when refLines are defined */
+  lat?: number
+  /** Geographic longitude interpolated from refLines — present only when refLines are defined */
+  lon?: number
+  /** Identifier of the layer that was clicked */
+  layerId: string
+}
+
 export interface CrossSectionOptions {
   padding?: Partial<Padding>
   /** Element to attach the tooltip div to (default: document.body) */
@@ -169,6 +183,10 @@ export interface CrossSectionOptions {
    * Increase for coarser patterns, decrease for finer ones.
    */
   hatchPatternSize?: number
+  /** Called when the user clicks on a layer. Receives the click coordinates and layer id. */
+  onClick?: (point: ClickPoint) => void
+  /** Initial pan offset in canvas pixels. Default: { x: 0, y: 0 } */
+  initialPan?: { x: number; y: number }
 }
 
 export interface Transform {
