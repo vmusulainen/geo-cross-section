@@ -130,6 +130,7 @@ All options and their sub-fields are optional. Defaults are shown below.
 | `measurementUnit`  | `string`            | `'m'`                                            | Unit label appended to all value displays  |
 | `hatchPatternSize` | `number`            | `48`                                             | On-screen PNG tile size in px              |
 | `tooltipContainer` | `HTMLElement`       | `document.body`                                  | Element the tooltip `<div>` is appended to |
+| `onClick`          | `(point: ClickPoint) => void` | —                               | Callback fired when the user clicks on a layer (see below) |
 
 ### `axes`
 
@@ -236,6 +237,35 @@ const cs = new CrossSection(container, {
 - Reference lines are drawn as dashed vertical lines spanning the full section height.
 - Each line shows a small badge with the label (or formatted lat/lon when no label is given).
 - When `refLines` are defined, clicking on the section computes interpolated lat/lon for the click position and shows it in the marker badge.
+
+---
+
+## Click callback
+
+Pass an `onClick` handler to receive data-space coordinates whenever the user clicks on a layer:
+
+```ts
+const cs = new CrossSection(container, data, {
+  onClick(point) {
+    console.log(point.layerId)    // layer id that was clicked
+    console.log(point.distance)   // horizontal distance along the transect
+    console.log(point.elevation)  // elevation at the click point
+    console.log(point.lat, point.lon) // interpolated lat/lon (only when refLines are defined)
+  },
+})
+```
+
+### `ClickPoint`
+
+| Field       | Type     | Description                                                              |
+|-------------|----------|--------------------------------------------------------------------------|
+| `distance`  | `number` | Horizontal distance along the transect (same units as `measurementUnit`) |
+| `elevation` | `number` | Elevation at the click point                                             |
+| `layerId`   | `string` | Identifier of the layer that was clicked                                 |
+| `lat`       | `number` | Interpolated latitude — present only when `refLines` are defined         |
+| `lon`       | `number` | Interpolated longitude — present only when `refLines` are defined        |
+
+The callback fires after the visual marker has been placed. Right-clicking removes the marker but does **not** fire `onClick`.
 
 ---
 
